@@ -47,14 +47,6 @@ def mostrar_estadisticas(lista_jugadores: list):
         print("El índice ingresado no es válido.")
 
 
-
-
-      
-    
-        
-
-#   
-         
 def calcular_promedio(lista_jugadores):
     acumulador = 0
     contador = 0
@@ -70,7 +62,7 @@ def calcular_promedio(lista_jugadores):
     return promedio
 
 
-def crear_diccionario(lista_jugadores: list):
+def mostrar_promedio(lista_jugadores: list):
     promedios_puntos = []
     for jugador in lista_jugadores:
         nombre = jugador["nombre"]
@@ -78,10 +70,7 @@ def crear_diccionario(lista_jugadores: list):
         nombre_y_promedio= ("{0}:{1}".format(nombre,promedios_punto))
         promedios_puntos.append(nombre_y_promedio)
 
-
-    
-    
-    return promedios_puntos
+        return promedios_puntos
 
 
 
@@ -138,25 +127,14 @@ def mostrar_logros(lista_jugadores):
         return "No se encontró ningún jugador con el nombre proporcionado."
 
 
-def miembro_del_salon_de_la_fama (lista_jugadores):
-    nombre = input("ingrese el nombre del jugador: ")
-    patron = " "
-    if re.match(r"^[A-Za-z]{3}", nombre):
-        patron = nombre
-    else:
-        return "No se encontró ningún jugador."
-    
-    salon_de_la_fama = []
+def verificar_salon_fama(lista_jugadores):
+    nombre_jugador = input("Ingrese el nombre del jugador: ")
     for jugador in lista_jugadores:
-        clave = jugador["logros"]["Miembro del Salon de la Fama del Baloncesto"]
-        if "logros" in jugador and clave in jugador["logros"]:
-
-            if patron.lower() in jugador["nombre"].lower():
-                salon_de_la_fama.append(jugador["nombre"])  
-    if salon_de_la_fama:
-        return salon_de_la_fama
-    else:
-        return "No se encontro"
+        nombre = jugador["nombre"]
+        logros = jugador["logros"]
+        if nombre_jugador.lower() == nombre.lower() and "Miembro del Salon de la Fama del Baloncesto" in logros:
+            return True
+    return False
 
                      
 def ivan_sort_A(lista_original:list):
@@ -257,19 +235,22 @@ def menu_final(lista_jugadores):
             for clave in mostrar_nombre_posicion(lista_jugadores):
                 print(clave)
         case 2:
-            while True:
-                    mostrar_nombre_posicion(lista_jugadores)
-                    mostrar_estadisticas(lista_jugadores)
+            for clave in mostrar_nombre_posicion(lista_jugadores):
+                print(clave)
+                mostrar_estadisticas(lista_jugadores)
         case 3:
             print(mostrar_logros(lista_jugadores))
         case 4:
             pass
         case 5:
             print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
-            for clave in ivan_sort_A(crear_diccionario(lista_jugadores)):
+            for clave in ivan_sort_A(mostrar_promedio(lista_jugadores)):
                 print(clave)
         case 6:
-            pass
+            if verificar_salon_fama(lista_jugadores):
+                print("El jugador es miembro del salon de la fama")
+            else:
+                print("El jugador no es miembro del salon de la fama")    
         case 7:
             calcular_y_mostrar_max_jugador(lista_jugadores, "rebotes_totales")
         case 8:
@@ -285,13 +266,13 @@ def menu_final(lista_jugadores):
         case 13:
             calcular_y_mostrar_max_jugador(lista_jugadores,"robos_totales")
         case 14:
-            pass
+            calcular_y_mostrar_max_jugador(lista_jugadores,"bloqueos_totales")
         case 15:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_libres")
         case 16:
             pass
         case 17:
-            pass
+            calcular_y_mostrar_max_jugador(lista_jugadores,"logros")
         case 18:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_triples")
         case 19:
