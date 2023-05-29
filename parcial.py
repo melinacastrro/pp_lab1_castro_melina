@@ -1,7 +1,7 @@
 import json
 import re
 import csv
-
+import os
 def leer_archivo(archivo_json:str)->list:
     '''
     Abre un archivo json en modo lectura
@@ -171,7 +171,23 @@ def verificar_salon_fama(lista_jugadores:list):
             return True
     return False
 
-
+def quick_sort(lista_original:list,flag_orden:bool)->list:
+    lista_de = []
+    lista_iz = []
+    if(len(lista_original)<=1):
+        return lista_original
+    else:
+        pivot = lista_original[0]
+        for elemento in lista_original[1:]:
+            if(elemento > pivot):
+                lista_de.append(elemento)
+            else:
+                lista_iz.append(elemento)
+    lista_iz = quick_sort(lista_iz,True)
+    lista_iz.append(pivot) 
+    lista_de = quick_sort(lista_de,True)
+    lista_iz.extend(lista_de) 
+    return lista_iz
                      
 def ivan_sort_A(lista_original:list)->list:
     '''
@@ -238,8 +254,8 @@ def mostrar_jugadores_mayor_al_promedio(lista_jugadores:list, clave:str):
             print("Jugador: {0}".format(nombre))
             clave_sin_guion = re.sub("_"," ",clave)
             print("Promedio de {0} por partido: {1}".format(clave_sin_guion, promedio))
-        else:
-            print("No se encontraron jugadores con promedio de {0} mayor que {1}.".format(clave_sin_guion, valor))
+    else:
+        print("No se encontraron jugadores con promedio de {0} mayor que {1}.".format(clave, valor))
 
 def obtener_jugador_mayor_logros(lista_jugadores:list)->str:
     '''
@@ -310,7 +326,7 @@ def buscar_jugadores_con_porcentaje_superior(lista_jugadores:list, porcentaje:fl
         porcentaje_tiros_de_campo = jugador["estadisticas"]["porcentaje_tiros_de_campo"]
         if porcentaje_tiros_de_campo > porcentaje:
             jugadores_filtrados.append(jugador)  
-
+        jugadores_filtrados = quick_sort(jugadores_filtrados,True)
     
     return jugadores_filtrados
     
@@ -327,14 +343,14 @@ def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):
 
     jugadores_filtrados = buscar_jugadores_con_porcentaje_superior(lista_jugadores,porcentaje_float)
     
-    if jugadores_filtrados:
+    if jugadores_filtrados:   
         for jugador in jugadores_filtrados:
             nombre = jugador["nombre"]
             posicion = jugador["posicion"]
             promedio = jugador["estadisticas"]["porcentaje_tiros_de_campo"]
             print("Jugador: {0}".format(nombre))
             print("Posicion: {0}".format(posicion))
-            print("Promedio de  {0}".format( promedio(re.sub(promedio))))
+            print("Promedio de  {0}".format( promedio))
     else:
         print("No se encontraron jugadores con promedio  mayor que {0}.".format(porcentaje_float))
 
@@ -364,6 +380,7 @@ def menu():
     "18 - Jugador con la mayor cantidad de temporadas jugadas\n"\
     "19 - Mostrar los jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior al valor ingresado\n"\
     "20 - BONUS !!! Mostrar la posición de cada jugador en los siguientes rankings:Puntos, Rebotes, Asistencias y Robos\n"\
+    "0 - Salir\n"\
     "Opcion elegida: "
 
     
@@ -384,6 +401,8 @@ def opcion_elegida():
 
 def menu_final(lista_jugadores):
     match(opcion_elegida()):
+        case 0:
+            os.system("cls")
         case 1:
             mostrar_nombre_posicion(lista_jugadores)
         case 2:
@@ -393,7 +412,7 @@ def menu_final(lista_jugadores):
             print(mostrar_logros(lista_jugadores))
         case 4:
             print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
-            for promedios in ivan_sort_A(mostrar_promedio(lista_jugadores)):
+            for promedios in quick_sort(mostrar_promedio(lista_jugadores),True):
                 print(promedios)
         case 5:
             if verificar_salon_fama(lista_jugadores):
@@ -428,10 +447,7 @@ def menu_final(lista_jugadores):
             calcular_y_mostrar_max_jugador(lista_jugadores,"temporadas")
         case 19:
             mostrar_jugadores_con_porcentaje_superior(lista_jugadores)
-        case 23:
-            pass
-        case _:
-            pass
+                
 
 while True :
     menu_final(lista_jugadores)
