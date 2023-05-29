@@ -70,7 +70,7 @@ def mostrar_promedio(lista_jugadores: list):
         nombre_y_promedio= ("{0}:{1}".format(nombre,promedios_punto))
         promedios_puntos.append(nombre_y_promedio)
 
-        return promedios_puntos
+    return promedios_puntos
 
 
 
@@ -93,19 +93,6 @@ def calcular_y_mostrar_max_jugador(lista_jugadores, clave):
     
      
 
-
-
-
-def mayor_al_valor_ingresado(lista_jugadores, valor_ingresado:int,clave):
-    
-    contador_jugadores = 0
-    valor_ingresado = input("Ingrese el valor numerico a buscar: ")
-    for jugador in lista_jugadores:
-        if valor_ingresado in jugador and clave in jugador["estadisticas"]:
-            if valor_ingresado > jugador[clave]:
-                contador_jugadores += clave["nombre"]
-
-    return contador_jugadores
 
 
 def mostrar_logros(lista_jugadores):
@@ -182,9 +169,46 @@ def mostrar_jugadores_mayor_al_promedio(lista_jugadores, clave):
             promedio = jugador["estadisticas"][clave]
             print("Jugador: {0}".format(nombre))
             print("Promedio de {0} por partido: {1}".format(clave, promedio))
-            print("-" * 30)
+            
     else:
         print("No se encontraron jugadores con promedio de {0} mayor que {1}.".format(clave, valor))
+
+def obtener_jugador_mayor_logros(jugadores):
+    jugador_mayor_logros = None
+    max_logros = 0
+
+    for jugador in jugadores:
+        logros = len(jugador["logros"])
+        if logros > max_logros:
+            max_logros = logros
+            jugador_mayor_logros = jugador["nombre"]
+            mensaje = "El jugador con mas logros es {0}:{1}".format(jugador_mayor_logros,max_logros)
+
+    return mensaje
+
+def crear_lista_de_promedio(lista_jugadores):
+    promedios_puntos = []
+    for jugador in lista_jugadores:
+        total_promedios_puntos = jugador["estadisticas"]["promedio_puntos_por_partido"]
+        promedios_puntos.append(total_promedios_puntos)
+
+    promedios_puntos_ordenado = ivan_sort_A(promedios_puntos)
+
+    return promedios_puntos_ordenado
+
+def promedio_sin_menor(lista_jugadores):
+    lista_promedios = crear_lista_de_promedio(lista_jugadores)
+    suma_promedios = 0
+    cantidad = len(lista_promedios) - 1
+    for promedio in lista_promedios[1:]:
+        suma_promedios += promedio
+        resultado = suma_promedios/cantidad
+
+
+    return resultado
+
+   
+
 
 
 def imprimir_dato(dato:str):
@@ -244,8 +268,9 @@ def menu_final(lista_jugadores):
             pass
         case 5:
             print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
-            for clave in ivan_sort_A(mostrar_promedio(lista_jugadores)):
-                print(clave)
+            for promedios in ivan_sort_A(mostrar_promedio(lista_jugadores)):
+                print(promedios)
+            
         case 6:
             if verificar_salon_fama(lista_jugadores):
                 print("El jugador es miembro del salon de la fama")
@@ -270,9 +295,9 @@ def menu_final(lista_jugadores):
         case 15:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_libres")
         case 16:
-            pass
+            print("El promedio de dream team sin el menor promedio es : {0}".format(promedio_sin_menor(lista_jugadores)))
         case 17:
-            calcular_y_mostrar_max_jugador(lista_jugadores,"logros")
+            print(obtener_jugador_mayor_logros(lista_jugadores))
         case 18:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_triples")
         case 19:
