@@ -109,7 +109,8 @@ def calcular_y_mostrar_max_jugador(lista_jugadores:list, clave:str)->None:
                 jugador_maximo = jugador["nombre"]
     
     if jugador_maximo:
-        print("{0} | {1}:{2}".format(jugador_maximo,clave,maximo))
+        clave_validada = re.sub("_"," ",clave)
+        print("{0} | {1}:{2}".format(jugador_maximo,clave_validada,maximo))
     
     
      
@@ -207,6 +208,7 @@ def mostrar_jugadores_mayor_al_promedio(lista_jugadores:list, clave:str):
     valor = input("Ingrese un valor numerico: ")
     valor_float = float(valor)
 
+
     jugadores_mayor_promedio = calcula_jugadores_mayor_promedio(lista_jugadores,clave,valor_float)
     
     if jugadores_mayor_promedio:
@@ -214,7 +216,8 @@ def mostrar_jugadores_mayor_al_promedio(lista_jugadores:list, clave:str):
             nombre = jugador["nombre"]
             promedio = jugador["estadisticas"][clave]
             print("Jugador: {0}".format(nombre))
-            print("Promedio de {0} por partido: {1}".format(clave, promedio))
+            clave_sin_guion = re.sub("_"," ",clave)
+            print("Promedio de {0} por partido: {1}".format(clave_sin_guion, promedio))
             
     else:
         print("No se encontraron jugadores con promedio de {0} mayor que {1}.".format(clave, valor))
@@ -283,7 +286,12 @@ def buscar_jugadores_con_porcentaje_superior(lista_jugadores:list, porcentaje:fl
 
     return jugadores_filtrados
 
-def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):      
+def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):  
+    '''
+    Muestra los jugadores con mayor porcentaje que el valor ingresado
+    Recibe una lista
+    Retorna una lista ordenada
+    '''    
     porcentaje = input("Ingrese un valor numerico: ")
     porcentaje_float = float(porcentaje)
 
@@ -349,50 +357,46 @@ def menu_final(lista_jugadores):
         case 1:
             mostrar_nombre_posicion(lista_jugadores)
         case 2:
-            for clave in mostrar_nombre_posicion(lista_jugadores):
-                print(clave)
-                mostrar_estadisticas(lista_jugadores)
+            mostrar_nombre_posicion(lista_jugadores)
+            mostrar_estadisticas(lista_jugadores)
         case 3:
             print(mostrar_logros(lista_jugadores))
         case 4:
-            pass
-        case 5:
             print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
             for promedios in ivan_sort_A(mostrar_promedio(lista_jugadores)):
                 print(promedios)
-            
-        case 6:
+        case 5:
             if verificar_salon_fama(lista_jugadores):
                 print("El jugador es miembro del salon de la fama")
             else:
                 print("El jugador no es miembro del salon de la fama")    
-        case 7:
+        case 6:
             calcular_y_mostrar_max_jugador(lista_jugadores, "rebotes_totales")
-        case 8:
+        case 7:
             calcular_y_mostrar_max_jugador(lista_jugadores, "porcentaje_tiros_de_campo")
-        case 9:
+        case 8:
             calcular_y_mostrar_max_jugador(lista_jugadores, "asistencias_totales")
-        case 10:
+        case 9:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"promedio_puntos_por_partido")
-        case 11:
+        case 10:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"promedio_rebotes_por_partido")
-        case 12:
+        case 11:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"asistencias_totales")
-        case 13:
+        case 12:
             calcular_y_mostrar_max_jugador(lista_jugadores,"robos_totales")
-        case 14:
+        case 13:
             calcular_y_mostrar_max_jugador(lista_jugadores,"bloqueos_totales")
-        case 15:
+        case 14:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_libres")
-        case 16:
+        case 15:
             print("El promedio de dream team sin el menor promedio es : {0}".format(promedio_sin_menor(lista_jugadores)))
-        case 17:
+        case 16:
             print(obtener_jugador_mayor_logros(lista_jugadores))
-        case 18:
+        case 17:
             mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_triples")
-        case 19:
+        case 18:
             calcular_y_mostrar_max_jugador(lista_jugadores,"temporadas")
-        case 20:
+        case 19:
             mostrar_jugadores_con_porcentaje_superior(lista_jugadores)
         case 23:
             pass
