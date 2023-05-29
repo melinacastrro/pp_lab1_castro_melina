@@ -3,6 +3,11 @@ import re
 import csv
 
 def leer_archivo(archivo_json:str)->list:
+    '''
+    Abre un archivo json en modo lectura
+    Recibe un archivo json
+    Retorna una lista
+    '''
     lista_jugadores = []
     with open(archivo_json,'r') as archivo:
         diccionario_jugadores = json.load(archivo)
@@ -13,18 +18,20 @@ lista_jugadores = leer_archivo(r'C:\Users\54113\OneDrive\Escritorio\Guia de ejer
 
 
 
-def mostrar_nombre_posicion(lista_jugadores):
-    lista_datos = []
-    for indice in lista_jugadores:
-        nombre = indice["nombre"]
-        posicion = indice["posicion"]
-        nombre_posicion = ("{0}|{1}".format(nombre,posicion))
-        lista_datos.append(nombre_posicion)
-
-    return lista_datos
+def mostrar_nombre_posicion(lista_jugadores:list)-> None:
+    '''
+    Itera la lista para obtener los elementos
+    Recibe una lista
+    '''
+    for jugador in lista_jugadores:
+        print("{0} | {1}".format(jugador["nombre"],jugador["posicion"]))
 
 
 def mostrar_estadisticas(lista_jugadores: list):
+    '''
+    Crea una lista de datos y la exporta a un archivo csv
+    Recibe una lista
+    '''
     lista_datos = []
     cantidad = len(lista_jugadores)
     indice = input("Ingrese el indice del jugador a buscar: ")
@@ -47,7 +54,12 @@ def mostrar_estadisticas(lista_jugadores: list):
         print("El índice ingresado no es válido.")
 
 
-def calcular_promedio(lista_jugadores):
+def calcular_promedio(lista_jugadores:list)->list:
+    '''
+    Calcula el promedio de puntos por partido
+    Recibe una lista
+    Retorna el promedio del dato buscado en la lista
+    '''
     acumulador = 0
     contador = 0
     for jugador in lista_jugadores:
@@ -62,7 +74,12 @@ def calcular_promedio(lista_jugadores):
     return promedio
 
 
-def mostrar_promedio(lista_jugadores: list):
+def mostrar_promedio(lista_jugadores: list)->list:
+    '''
+    Crea una lista de promedios y los muestra 
+    Recibe una lista
+    Retorna una lista nueva con el promedio buscado
+    '''
     promedios_puntos = []
     for jugador in lista_jugadores:
         nombre = jugador["nombre"]
@@ -75,7 +92,11 @@ def mostrar_promedio(lista_jugadores: list):
 
 
 
-def calcular_y_mostrar_max_jugador(lista_jugadores, clave):
+def calcular_y_mostrar_max_jugador(lista_jugadores:list, clave:str)->None:
+    '''
+    Calcula y muestra el maximo valor de una clave en la lista
+    Recibe un lista
+    '''
     maximo = 0
     jugador_maximo = None
 
@@ -95,7 +116,12 @@ def calcular_y_mostrar_max_jugador(lista_jugadores, clave):
 
 
 
-def mostrar_logros(lista_jugadores):
+def mostrar_logros(lista_jugadores:list)->list:
+    '''
+    Busca un jugador por su nombre, lo agrega a lista y muestra sus logros
+    Recibe una lista
+    Retorna una lista
+    '''
     nombre = input("Ingrese el nombre del jugador: ")
     patron = " "
     if re.match(r"^[A-Za-z]{3}", nombre):
@@ -114,7 +140,13 @@ def mostrar_logros(lista_jugadores):
         return "No se encontró ningún jugador con el nombre proporcionado."
 
 
-def verificar_salon_fama(lista_jugadores):
+def verificar_salon_fama(lista_jugadores:list):
+    '''
+    Verifica si el nombre del jugador ingresado se encuentra en el salon de la fama
+    Recibe una lista
+    Retorna true en caso de encontrarlo o false si no lo encuentra
+    
+    '''
     nombre_jugador = input("Ingrese el nombre del jugador: ")
     for jugador in lista_jugadores:
         nombre = jugador["nombre"]
@@ -124,7 +156,12 @@ def verificar_salon_fama(lista_jugadores):
     return False
 
                      
-def ivan_sort_A(lista_original:list):
+def ivan_sort_A(lista_original:list)->list:
+    '''
+    Ordena una lista de manera ascendente
+    Recine una lista
+    Retorna una lista ordenada
+    '''
     lista = lista_original[:]
     rango_a = len(lista)
     flag_swap = True
@@ -143,7 +180,12 @@ def ivan_sort_A(lista_original:list):
     return lista
 
       
-def mostrar_jugadores_mayor_promedio(lista_jugadores, clave,valor):
+def calcula_jugadores_mayor_promedio(lista_jugadores:list, clave:str,valor:float):
+    '''
+    Calcula los jugadores con mayor promedio y los añade a una lista
+    Recibe una lista, una clave y un valor numerico
+    Retorna una lista de los jugadores seleccionados
+    '''
     
 
     jugadores_seleccionados = []
@@ -157,11 +199,15 @@ def mostrar_jugadores_mayor_promedio(lista_jugadores, clave,valor):
 
     return jugadores_seleccionados
 
-def mostrar_jugadores_mayor_al_promedio(lista_jugadores, clave):
+def mostrar_jugadores_mayor_al_promedio(lista_jugadores:list, clave:str):
+    '''
+    Muestra los jugadores con mayor promedio del nivel ingresado
+    Recibe una lista y la clave a calcular
+    '''
     valor = input("Ingrese un valor numerico: ")
     valor_float = float(valor)
 
-    jugadores_mayor_promedio = mostrar_jugadores_mayor_promedio(lista_jugadores,clave,valor_float)
+    jugadores_mayor_promedio = calcula_jugadores_mayor_promedio(lista_jugadores,clave,valor_float)
     
     if jugadores_mayor_promedio:
         for jugador in jugadores_mayor_promedio:
@@ -173,11 +219,16 @@ def mostrar_jugadores_mayor_al_promedio(lista_jugadores, clave):
     else:
         print("No se encontraron jugadores con promedio de {0} mayor que {1}.".format(clave, valor))
 
-def obtener_jugador_mayor_logros(jugadores):
+def obtener_jugador_mayor_logros(lista_jugadores:list)->str:
+    '''
+    Obtiene el jugador con mayores logros de la lista
+    Recibe una lista
+    Retorna un mensaje
+    '''
     jugador_mayor_logros = None
     max_logros = 0
 
-    for jugador in jugadores:
+    for jugador in lista_jugadores:
         logros = len(jugador["logros"])
         if logros > max_logros:
             max_logros = logros
@@ -186,7 +237,12 @@ def obtener_jugador_mayor_logros(jugadores):
 
     return mensaje
 
-def crear_lista_de_promedio(lista_jugadores):
+def crear_lista_de_promedio(lista_jugadores:list)->list:
+    '''
+    Crea una lista con los promedios de puntos por partido ordenados de manera ascendente
+    Recibe una lista
+    Retorna una lista ordenada
+    '''
     promedios_puntos = []
     for jugador in lista_jugadores:
         total_promedios_puntos = jugador["estadisticas"]["promedio_puntos_por_partido"]
@@ -196,7 +252,12 @@ def crear_lista_de_promedio(lista_jugadores):
 
     return promedios_puntos_ordenado
 
-def promedio_sin_menor(lista_jugadores):
+def promedio_sin_menor(lista_jugadores:list)->float:
+    '''
+    Calcula el promedio total excluyendo al menor valor de la lista previamente ordenada
+    Recibe una lista
+    Retorna un resultado
+    '''
     lista_promedios = crear_lista_de_promedio(lista_jugadores)
     suma_promedios = 0
     cantidad = len(lista_promedios) - 1
@@ -207,12 +268,42 @@ def promedio_sin_menor(lista_jugadores):
 
     return resultado
 
-   
+def buscar_jugadores_con_porcentaje_superior(lista_jugadores:list, porcentaje:float)->list:
+    '''
+    Filtra jugadores que son mayores al porcentaje
+    Recibe una lista y un valor flotante
+    Retorna una lista con los valores ordenados
+    '''
+    jugadores_filtrados = []
 
+    for jugador in lista_jugadores:
+        porcentaje_tiros_de_campo = jugador["estadisticas"]["porcentaje_tiros_de_campo"]
+        if porcentaje_tiros_de_campo > porcentaje:
+            jugadores_filtrados.append(jugador)  
 
+    return jugadores_filtrados
 
-def imprimir_dato(dato:str):
-    print(dato)    
+def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):      
+    porcentaje = input("Ingrese un valor numerico: ")
+    porcentaje_float = float(porcentaje)
+
+    jugadores_filtrados = buscar_jugadores_con_porcentaje_superior(lista_jugadores,porcentaje_float)
+    
+    if jugadores_filtrados:
+        for jugador in jugadores_filtrados:
+            nombre = jugador["nombre"]
+            posicion = jugador["posicion"]
+            promedio = jugador["estadisticas"]["porcentaje_tiros_de_campo"]
+            print("Jugador: {0}".format(nombre))
+            print("Posicion: {0}".format(posicion))
+            print("Promedio de  {0}".format( promedio))
+    else:
+        print("No se encontraron jugadores con promedio  mayor que {0}.".format(promedio))
+
+    jugadores_filtrados_ordenados = ivan_sort_A(jugadores_filtrados)
+
+    return jugadores_filtrados_ordenados    
+
 
 def menu():
     menu = "1 - Mostrar todos los jugadores del Dream Team\n"\
@@ -256,8 +347,7 @@ def opcion_elegida():
 def menu_final(lista_jugadores):
     match(opcion_elegida()):
         case 1:
-            for clave in mostrar_nombre_posicion(lista_jugadores):
-                print(clave)
+            mostrar_nombre_posicion(lista_jugadores)
         case 2:
             for clave in mostrar_nombre_posicion(lista_jugadores):
                 print(clave)
@@ -303,7 +393,7 @@ def menu_final(lista_jugadores):
         case 19:
             calcular_y_mostrar_max_jugador(lista_jugadores,"temporadas")
         case 20:
-            pass
+            mostrar_jugadores_con_porcentaje_superior(lista_jugadores)
         case 23:
             pass
         case _:
