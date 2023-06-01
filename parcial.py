@@ -171,24 +171,7 @@ def verificar_salon_fama(lista_jugadores:list):
             return True
     return False
 
-def quick_sort(lista_original:list,flag_orden:bool)->list:
-    lista_de = []
-    lista_iz = []
-    if(len(lista_original)<=1):
-        return lista_original
-    else:
-        pivot = lista_original[0]
-        for elemento in lista_original[1:]:
-            if(elemento > pivot):
-                lista_de.append(elemento)
-            else:
-                lista_iz.append(elemento)
-    lista_iz = quick_sort(lista_iz,True)
-    lista_iz.append(pivot) 
-    lista_de = quick_sort(lista_de,True)
-    lista_iz.extend(lista_de) 
-    return lista_iz
-                     
+
 def ivan_sort_A(lista_original:list)->list:
     '''
     Ordena una lista de manera ascendente
@@ -212,7 +195,9 @@ def ivan_sort_A(lista_original:list)->list:
     
     return lista
 
-      
+
+
+
 def calcula_jugadores_mayor_promedio(lista_jugadores:list, clave:str,valor:float):
     '''
     Calcula los jugadores con mayor promedio y los añade a una lista
@@ -294,6 +279,7 @@ def crear_lista_de_promedio(lista_jugadores:list)->list:
 
     return promedios_puntos_ordenado
 
+
 def promedio_sin_menor(lista_jugadores:list)->float:
     '''
     Calcula el promedio total excluyendo al menor valor de la lista previamente ordenada
@@ -326,10 +312,18 @@ def buscar_jugadores_con_porcentaje_superior(lista_jugadores:list, porcentaje:fl
         porcentaje_tiros_de_campo = jugador["estadisticas"]["porcentaje_tiros_de_campo"]
         if porcentaje_tiros_de_campo > porcentaje:
             jugadores_filtrados.append(jugador)  
-        jugadores_filtrados = quick_sort(jugadores_filtrados,True)
-    
+
+    rango = len(jugadores_filtrados)
+    flag_swap = True
+    while(flag_swap):
+        flag_swap = False
+        rango -= 1
+        for indice in range(rango):
+            if jugadores_filtrados[indice]["posicion"] > jugadores_filtrados[indice + 1]["posicion"] :
+                jugadores_filtrados[indice],jugadores_filtrados[indice + 1] = jugadores_filtrados[indice + 1],jugadores_filtrados[indice]
+                flag_swap = True
     return jugadores_filtrados
-    
+   
 def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):  
     '''
     Muestra los jugadores con mayor porcentaje que el valor ingresado
@@ -354,16 +348,133 @@ def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):
     else:
         print("No se encontraron jugadores con promedio  mayor que {0}.".format(porcentaje_float))
 
-    
-
     return jugadores_filtrados    
+def contar_por_posicion(lista_jugadores):
+    posiciones = {}
+    for jugador in lista_jugadores:
+        clave = jugador["posicion"]
+        if clave in posiciones:
+            posiciones[clave] += 1  
+        else:
+            posiciones[clave] = 1 
+    return posiciones
 
+#print(contar_por_posicion(lista_jugadores))        
+
+
+def quick_sort_dicts(lista:list, clave: str, asc:bool = True)->list:
+  
+
+    lista_de = []
+    lista_iz = []
+    if(len(lista)<=1):
+        return lista
+
+    pivot_encontrado = False
+
+    for elemento in lista:
+        for clave_elemento, valor_elemento in elemento.items():
+            if clave in valor_elemento:
+                if not pivot_encontrado:
+                    pivot = elemento
+                    pivot_encontrado = True
+                else:
+                    if type(valor_elemento) == type(dict()):
+                        if asc and valor_elemento[clave] > pivot[clave_elemento][clave] or \
+                                not asc and valor_elemento[clave] < pivot[clave_elemento][clave]:
+                            lista_de.append(elemento)
+                        else:
+                            lista_iz.append(elemento)
+
+    lista_iz = quick_sort_dicts(lista_iz, clave, asc)
+    lista_iz.append(pivot)
+    lista_de = quick_sort_dicts(lista_de, clave, asc)
+
+    lista_iz.extend(lista_de)
+    lista_ordenada = lista_iz
+    return lista_ordenada
+def exportar_rankings_a_csv(lista_jugadores):
+    '''
+    Crea y ordena las listas de estadisticas en orden descendente. Se crea la lista del ranking de los jugadores,se itera cada jugador
+    de la lista de jugadores y se agrega al diccionario de posiciones, se itera cada de indice de las listas de estadisticas
+    si coincide en nombre del jugador con la lista que se esta iterando se agrega al diccionario y su posicion. Luego se agrega
+    todo el diccionario a la lista de ranking. Luego se genera un archivo csv con las posiciones en el ranking de cada jugador.
+    Recibe una lista
+    Retorna una lista
+    
+    '''
+    puntos_ordenados = quick_sort_dicts(lista_jugadores,"puntos_totales",False)
+    rebotes_ordenados = quick_sort_dicts(lista_jugadores,"rebotes_totales",False)
+    asistencias_ordenadas = quick_sort_dicts(lista_jugadores,"asistencias_totales",False)
+    robos_ordenados = quick_sort_dicts(lista_jugadores,"robos_totales",False)
+
+    ranking_jugadores = []
+    for jugador in lista_jugadores:
+        posiciones_en_ranking = {}
+        for indice in range(len(puntos_ordenados)):
+            if jugador["nombre"] == puntos_ordenados[indice]["nombre"]:
+                posiciones_en_ranking["jugador"] = puntos_ordenados[indice]["nombre"]
+                posiciones_en_ranking["puntos"] = indice + 1
+                break
+    
+        for indice in range(len(rebotes_ordenados)):
+            if jugador["nombre"] == rebotes_ordenados[indice]["nombre"]:
+                posiciones_en_ranking["rebotes"] = indice + 1
+                break  
+
+        for indice in range(len(asistencias_ordenadas)):
+            if jugador["nombre"] ==asistencias_ordenadas[indice]["nombre"]:
+                posiciones_en_ranking["asistencias"] = indice + 1
+                break      
+        for indice in range(len(robos_ordenados)):
+            if jugador["nombre"] == robos_ordenados[indice]["nombre"]:
+                posiciones_en_ranking["robos"] = indice + 1
+                break         
+        ranking_jugadores.append(posiciones_en_ranking)  
+
+    with open("ranking_jugadores.csv", "w") as archivo_csv:
+        archivo_csv.write("Puntos   Rebotes   Asistencias   Robos   Jugador\n")
+        for jugador in ranking_jugadores:
+            linea = "{:<10}{:<12}{:<12}{:<7}{}\n".format(jugador["puntos"], jugador["rebotes"], jugador["asistencias"], jugador["robos"], jugador["jugador"])
+            archivo_csv.write(linea)
+
+        if "ranking_jugadores.csv":
+            return print("Archivo guardado correctamente")
+        else:
+            return print("Error") 
+
+
+
+
+
+
+
+
+def calcular_mejores_estadisticas(lista_jugadores):
+    jugador_maximo = None
+    puntaje_maximo = 0
+
+    for jugador in lista_jugadores:
+        estadisticas = 0
+        for estadistica in jugador["estadisticas"].values():
+            estadisticas += estadistica
+        if jugador_maximo is None or estadisticas > puntaje_maximo:
+            jugador_maximo = jugador
+            puntaje_maximo = estadisticas
+
+    return jugador_maximo
+#print(calcular_mejores_estadisticas(lista_jugadores))                  
+
+
+    
+    
+    
 
 def menu():
     menu = "1 - Mostrar todos los jugadores del Dream Team\n"\
     "2 - Mostrar estadísticas de un jugador\n"\
     "3 - Buscar un jugador por su nombre y mostrar sus logros\n"\
-    "4 - Mostrar promedio de puntos por partido de todo el Dream Team\n"\
+    "4 - Mostrar prome0dio de puntos por partido de todo el Dream Team\n"\
     "5 - Mostrar si es Miembro del Salón de la Fama del Baloncesto\n"\
     "6 - Jugador con la mayor cantidad de rebotes totales\n"\
     "7 - Jugador con el mayor porcentaje de tiros de campo\n"\
@@ -379,75 +490,94 @@ def menu():
     "17 - Mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior al valor ingresado\n"\
     "18 - Jugador con la mayor cantidad de temporadas jugadas\n"\
     "19 - Mostrar los jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior al valor ingresado\n"\
-    "20 - BONUS !!! Mostrar la posición de cada jugador en los siguientes rankings:Puntos, Rebotes, Asistencias y Robos\n"\
+    "23 - BONUS !!! Mostrar la posición de cada jugador en los siguientes rankings:Puntos, Rebotes, Asistencias y Robos\n"\
     "0 - Salir\n"\
-    "Opcion elegida: "
+    
 
     
-    return menu
+    print( menu)
     
-def validar_entero(string:str):
-    if type (string) == str:
-        return int(string)
-    else:
-        return -1
-    
+
 def opcion_elegida():
-    opcion = validar_entero(input(menu()))
-    if opcion:
-        return opcion
-    else:
-        return -1
+    opcion = input("Ingrese una opción: ")
+    while not re.match(r"^(0|[1-9]|2[0-9])$", opcion):
+        print("Opción inválida. Intente nuevamente.")
+        opcion = input("Ingrese una opción: ")
+    return int(opcion)
 
-def menu_final(lista_jugadores):
-    match(opcion_elegida()):
-        case 0:
-            os.system("cls")
-        case 1:
-            mostrar_nombre_posicion(lista_jugadores)
-        case 2:
-            mostrar_nombre_posicion(lista_jugadores)
-            mostrar_estadisticas(lista_jugadores)
-        case 3:
-            print(mostrar_logros(lista_jugadores))
-        case 4:
-            print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
-            for promedios in quick_sort(mostrar_promedio(lista_jugadores),True):
-                print(promedios)
-        case 5:
-            if verificar_salon_fama(lista_jugadores):
-                print("El jugador es miembro del salon de la fama")
-            else:
-                print("El jugador no es miembro del salon de la fama")    
-        case 6:
-            calcular_y_mostrar_max_jugador(lista_jugadores, "rebotes_totales")
-        case 7:
-            calcular_y_mostrar_max_jugador(lista_jugadores, "porcentaje_tiros_de_campo")
-        case 8:
-            calcular_y_mostrar_max_jugador(lista_jugadores, "asistencias_totales")
-        case 9:
-            mostrar_jugadores_mayor_al_promedio(lista_jugadores,"promedio_puntos_por_partido")
-        case 10:
-            mostrar_jugadores_mayor_al_promedio(lista_jugadores,"promedio_rebotes_por_partido")
-        case 11:
-            mostrar_jugadores_mayor_al_promedio(lista_jugadores,"asistencias_totales")
-        case 12:
-            calcular_y_mostrar_max_jugador(lista_jugadores,"robos_totales")
-        case 13:
-            calcular_y_mostrar_max_jugador(lista_jugadores,"bloqueos_totales")
-        case 14:
-            mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_libres")
-        case 15:
-            print("El promedio de dream team sin el menor promedio es : {0}".format(promedio_sin_menor(lista_jugadores)))
-        case 16:
-            print(obtener_jugador_mayor_logros(lista_jugadores))
-        case 17:
-            mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_triples")
-        case 18:
-            calcular_y_mostrar_max_jugador(lista_jugadores,"temporadas")
-        case 19:
-            mostrar_jugadores_con_porcentaje_superior(lista_jugadores)
+
+while True:
+    menu()
+    opcion = opcion_elegida()
+    match(opcion):
+            case 0:
+                os.system("cls")
+            case 1:
+                mostrar_nombre_posicion(lista_jugadores)
+            case 2:
+                mostrar_nombre_posicion(lista_jugadores)
+                mostrar_estadisticas(lista_jugadores)
+            case 3:
+                print(mostrar_logros(lista_jugadores))
+            case 4:
+                print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
+                for promedios in ivan_sort_A(mostrar_promedio(lista_jugadores)):
+                    print(promedios)
+            case 5:
+                if verificar_salon_fama(lista_jugadores):
+                    print("El jugador es miembro del salon de la fama")
+                else:
+                    print("El jugador no es miembro del salon de la fama")    
+            case 6:
+                calcular_y_mostrar_max_jugador(lista_jugadores, "rebotes_totales")
+            case 7:
+                calcular_y_mostrar_max_jugador(lista_jugadores, "porcentaje_tiros_de_campo")
+            case 8:
+                calcular_y_mostrar_max_jugador(lista_jugadores, "asistencias_totales")
+            case 9:
+                mostrar_jugadores_mayor_al_promedio(lista_jugadores,"promedio_puntos_por_partido")
+            case 10:
+                mostrar_jugadores_mayor_al_promedio(lista_jugadores,"promedio_rebotes_por_partido")
+            case 11:
+                mostrar_jugadores_mayor_al_promedio(lista_jugadores,"asistencias_totales")
+            case 12:
+                calcular_y_mostrar_max_jugador(lista_jugadores,"robos_totales")
+            case 13:
+                calcular_y_mostrar_max_jugador(lista_jugadores,"bloqueos_totales")
+            case 14:
+                mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_libres")
+            case 15:
+                print("El promedio de dream team sin el menor promedio es : {0}".format(promedio_sin_menor(lista_jugadores)))
+            case 16:
+                print(obtener_jugador_mayor_logros(lista_jugadores))
+            case 17:
+                mostrar_jugadores_mayor_al_promedio(lista_jugadores,"porcentaje_tiros_triples")
+            case 18:
+                calcular_y_mostrar_max_jugador(lista_jugadores,"temporadas")
+            case 19:
+                mostrar_jugadores_con_porcentaje_superior(lista_jugadores)
+            case 23:
+                exportar_rankings_a_csv(lista_jugadores)
+            case 24:
+                print(contar_por_posicion(lista_jugadores))
+            case 25:
+                pass
+            case 26:
+                calcular_y_mostrar_max_jugador(lista_jugadores,"temporadas")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"puntos_totales")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"promedio_puntos_por_partido")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"rebotes_totales")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"promedio_rebotes_por_partido")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"asistencias_totales")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"promedio_asistencias_por_partido")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"robos_totales")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"bloqueos_totales")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"porcentaje_tiros_de_campo")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"porcentaje_tiros_libres")
+                calcular_y_mostrar_max_jugador(lista_jugadores,"porcentaje_tiros_triples")
                 
+            case 27:
+                print(calcular_mejores_estadisticas(lista_jugadores))    
+                    
 
-while True :
-    menu_final(lista_jugadores)
+
