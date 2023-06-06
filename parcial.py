@@ -16,23 +16,7 @@ def leer_archivo(archivo_json:str)->list:
     
 lista_jugadores = leer_archivo(r'C:\Users\54113\OneDrive\Escritorio\Guia de ejercicios\parcial.py\dt.json')
 
-def quick_sort(lista_original:list,flag_orden:bool)->list:
-    lista_de = []
-    lista_iz = []
-    if(len(lista_original)<=1):
-        return lista_original
-    else:
-        pivot = lista_original[0]
-        for elemento in lista_original[1:]:
-            if(elemento > pivot):
-                lista_de.append(elemento)
-            else:
-                lista_iz.append(elemento)
-    lista_iz = quick_sort(lista_iz,True)
-    lista_iz.append(pivot) 
-    lista_de = quick_sort(lista_de,True)
-    lista_iz.extend(lista_de) 
-    return lista_iz
+
 
 def mostrar_nombre_posicion(lista_jugadores:list)-> None:
     '''
@@ -74,7 +58,7 @@ def mostrar_estadisticas(lista_jugadores: list):
                  print("El índice ingresado no es válido.")
 def quick_sort_estadistica(lista:list,clave:str,flag:bool) -> list:
     """
-    Es un algoritmo de ordenamiento basado en las estadisticas
+    Ordenamiento especifico para la clave estadisticas
     Recibe una lista, clave y el flag para asc o desc por parametro
     Retorna una lista ordenada de forma asc o desc
     """
