@@ -72,19 +72,30 @@ def mostrar_estadisticas(lista_jugadores: list):
                 file.write(str(dato) + "\n")
             else:
                  print("El índice ingresado no es válido.")
-
-def ivan_sort_estadisticas(lista,clave,orden):
-    rango = len(lista_jugadores)
-    flag_swap = True
-    while flag_swap:
-        flag_swap = False
-        rango -= 1
-        for indice in range(rango):
-            if orden == "asc" and lista[indice]["estadisticas"][clave] > lista[indice +1]["estadisticas"][clave] or \
-            orden == "des" and lista[indice]["estadisticas"][clave] < lista[indice + 1]["estadisticas"][clave]:
-                lista[indice],lista[indice + 1] = lista[indice +1],lista[indice]
-                flag_swap = True
-    return lista         
+def quick_sort_estadistica(lista:list,clave:str,flag:bool) -> list:
+    """
+    Es un algoritmo de ordenamiento basado en las estadisticas
+    Recibe una lista, clave y el flag para asc o desc por parametro
+    Retorna una lista ordenada de forma asc o desc
+    """
+    lista_de = []
+    lista_iz = []
+    if len(lista) <= 1:
+            return lista
+    else:
+        cantidad = len(lista)
+        pivot = lista[0]
+        for i in range(1,cantidad):
+            if flag == True and lista[i]["estadisticas"][clave] > pivot["estadisticas"][clave] or flag == False and lista[i]["estadisticas"][clave] < pivot["estadisticas"][clave]:
+                lista_de.append(lista[i])
+            elif flag == True and lista[i]["estadisticas"][clave] <= pivot["estadisticas"][clave] or flag == False and lista[i]["estadisticas"][clave] > pivot["estadisticas"][clave]:
+                lista_iz.append(lista[i])
+    lista_iz = quick_sort_estadistica(lista_iz,clave,flag)
+    lista_iz.append(pivot)
+    lista_de = quick_sort_estadistica(lista_de,clave,flag)
+    lista_iz.extend(lista_de)
+    return lista_iz
+   
 def calcular_promedio(lista_jugadores:list)->list:
     '''
     Calcula el promedio de puntos por partido
@@ -116,7 +127,7 @@ def mostrar_promedio(lista_jugadores: list)->list:
     if len(lista_jugadores) == 0:
         return lista_jugadores
     promedio_total = calcular_promedio(lista_jugadores)
-    promedios_ordenados = ivan_sort_estadisticas(lista_jugadores, "promedio_puntos_por_partido", "asc")
+    promedios_ordenados = quick_sort_estadistica(lista_jugadores, "promedio_puntos_por_partido", True)
     print("El promedio total del Dream Team es : {0}".format(promedio_total))
     for jugador in promedios_ordenados:
         nombre = jugador["nombre"]
@@ -202,7 +213,7 @@ def miembro_del_salon(lista_jugadores):
                 return("No es miembro del salon de la fama")
 
 
-def ivan_sort_A(lista_original:list)->list:
+def ivan_sort_A(lista_original:list,clave:str)->list:
     '''
     Ordena una lista de manera ascendente
     Recine una lista
@@ -218,8 +229,8 @@ def ivan_sort_A(lista_original:list)->list:
 
         for indice_A in range(rango_a):
             contador += 1
-            if  lista[indice_A] > lista[indice_A+1]:
-                lista[indice_A],lista[indice_A+1] = lista[indice_A+1],lista[indice_A]
+            if  lista[indice_A][clave] > lista[indice_A+1][clave]:
+                lista[indice_A][clave],lista[indice_A+1][clave] = lista[indice_A+1][clave],lista[indice_A][clave]
                 flag_swap = True
 
     
@@ -291,39 +302,42 @@ def obtener_jugador_mayor_logros(lista_jugadores:list)->str:
 
     return mensaje
 
-def crear_lista_de_promedio(lista_jugadores:list)->list:
-    '''
+def crear_lista_de_promedio(lista_jugadores):
+    """
     Crea una lista con los promedios de puntos por partido ordenados de manera ascendente
     Recibe una lista
     Retorna una lista ordenada
-    '''
+    """
     if len(lista_jugadores) == 0:
         return lista_jugadores
+
     promedios_puntos = []
-    for jugador in lista_jugadores:
+    promedios_puntos_ordenado = quick_sort_estadistica(lista_jugadores, "promedio_puntos_por_partido", True)
+
+    for jugador in promedios_puntos_ordenado:
         total_promedios_puntos = jugador["estadisticas"]["promedio_puntos_por_partido"]
         promedios_puntos.append(total_promedios_puntos)
 
-    promedios_puntos_ordenado = ivan_sort_A(promedios_puntos)
-
-    return promedios_puntos_ordenado
+    return promedios_puntos
 
 
-def promedio_sin_menor(lista_jugadores:list)->float:
-    '''
+def promedio_sin_menor(lista_jugadores):
+    """
     Calcula el promedio total excluyendo al menor valor de la lista previamente ordenada
     Recibe una lista
     Retorna un resultado
-    '''
+    """
     if len(lista_jugadores) == 0:
-        return lista_jugadores
+        return 0
+
     lista_promedios = crear_lista_de_promedio(lista_jugadores)
     suma_promedios = 0
     cantidad = len(lista_promedios) - 1
+
     for promedio in lista_promedios[1:]:
         suma_promedios += promedio
-        resultado = suma_promedios/cantidad
 
+    resultado = suma_promedios / cantidad
 
     return resultado
 
@@ -342,15 +356,8 @@ def buscar_jugadores_con_porcentaje_superior(lista_jugadores:list, porcentaje:fl
         if porcentaje_tiros_de_campo > porcentaje:
             jugadores_filtrados.append(jugador)  
 
-    rango = len(jugadores_filtrados)
-    flag_swap = True
-    while(flag_swap):
-        flag_swap = False
-        rango -= 1
-        for indice in range(rango):
-            if jugadores_filtrados[indice]["posicion"] > jugadores_filtrados[indice + 1]["posicion"] :
-                jugadores_filtrados[indice],jugadores_filtrados[indice + 1] = jugadores_filtrados[indice + 1],jugadores_filtrados[indice]
-                flag_swap = True
+    jugadores_filtrados = ivan_sort_A(lista_jugadores,"posicion")
+
     return jugadores_filtrados
    
 def mostrar_jugadores_con_porcentaje_superior(lista_jugadores:list):  
@@ -391,42 +398,7 @@ def contar_por_posicion(lista_jugadores):
 #print(contar_por_posicion(lista_jugadores))        
 
 
-def quick_sort_dicts(lista:list, clave: str, asc:bool = True)->list:
-    '''
-    Realiza una clasificación rápida en una lista de diccionarios según una clave y un orden específico.
-    Ordena los datos que están dentro de un diccionario de la lista.
-    Recibe una lista, una clave y un booleano
-    Retorna una lista ordenada
-    '''
 
-    lista_de = []
-    lista_iz = []
-    if(len(lista)<=1):
-        return lista
-
-    pivot_encontrado = False
-
-    for elemento in lista:
-        for clave_elemento, valor_elemento in elemento.items():
-            if clave in valor_elemento:
-                if not pivot_encontrado:
-                    pivot = elemento
-                    pivot_encontrado = True
-                else:
-                    if type(valor_elemento) == type(dict()):
-                        if asc and valor_elemento[clave] > pivot[clave_elemento][clave] or \
-                                not asc and valor_elemento[clave] < pivot[clave_elemento][clave]:
-                            lista_de.append(elemento)
-                        else:
-                            lista_iz.append(elemento)
-
-    lista_iz = quick_sort_dicts(lista_iz, clave, asc)
-    lista_iz.append(pivot)
-    lista_de = quick_sort_dicts(lista_de, clave, asc)
-
-    lista_iz.extend(lista_de)
-    lista_ordenada = lista_iz
-    return lista_ordenada
 def exportar_rankings_a_csv(lista_jugadores):
     '''
     Crea y ordena las listas de estadisticas en orden descendente. Se crea la lista del ranking de los jugadores,se itera cada jugador
@@ -437,16 +409,17 @@ def exportar_rankings_a_csv(lista_jugadores):
     Retorna una lista
     
     '''
-    puntos_ordenados = quick_sort_dicts(lista_jugadores,"puntos_totales",False)
-    rebotes_ordenados = quick_sort_dicts(lista_jugadores,"rebotes_totales",False)
-    asistencias_ordenadas = quick_sort_dicts(lista_jugadores,"asistencias_totales",False)
-    robos_ordenados = quick_sort_dicts(lista_jugadores,"robos_totales",False)
+    puntos_ordenados = quick_sort_estadistica(lista_jugadores,"puntos_totales",False)
+    rebotes_ordenados = quick_sort_estadistica(lista_jugadores,"rebotes_totales",False)
+    asistencias_ordenadas = quick_sort_estadistica(lista_jugadores,"asistencias_totales",False)
+    robos_ordenados = quick_sort_estadistica(lista_jugadores,"robos_totales",False)
 
     ranking_jugadores = []
     for jugador in lista_jugadores:
         posiciones_en_ranking = {}
         for indice in range(len(puntos_ordenados)):
             if jugador["nombre"] == puntos_ordenados[indice]["nombre"]:
+
                 posiciones_en_ranking["jugador"] = puntos_ordenados[indice]["nombre"]
                 posiciones_en_ranking["puntos"] = indice + 1
                 break
