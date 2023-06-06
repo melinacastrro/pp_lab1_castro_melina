@@ -1,7 +1,7 @@
 import json
 import re
-import csv
 import os
+
 def leer_archivo(archivo_json:str)->list:
     '''
     Abre un archivo json en modo lectura
@@ -16,7 +16,23 @@ def leer_archivo(archivo_json:str)->list:
     
 lista_jugadores = leer_archivo(r'C:\Users\54113\OneDrive\Escritorio\Guia de ejercicios\parcial.py\dt.json')
 
-
+def quick_sort(lista_original:list,flag_orden:bool)->list:
+    lista_de = []
+    lista_iz = []
+    if(len(lista_original)<=1):
+        return lista_original
+    else:
+        pivot = lista_original[0]
+        for elemento in lista_original[1:]:
+            if(elemento > pivot):
+                lista_de.append(elemento)
+            else:
+                lista_iz.append(elemento)
+    lista_iz = quick_sort(lista_iz,True)
+    lista_iz.append(pivot) 
+    lista_de = quick_sort(lista_de,True)
+    lista_iz.extend(lista_de) 
+    return lista_iz
 
 def mostrar_nombre_posicion(lista_jugadores:list)-> None:
     '''
@@ -36,28 +52,39 @@ def mostrar_estadisticas(lista_jugadores: list):
     '''
     if len(lista_jugadores) == 0:
         return lista_jugadores
+    indice = input("Ingrese el indice del jugador a mostrar: ")
+    indice_int = int( indice)
+
+    jugador = lista_jugadores[indice_int]
+    estadisticas = jugador["estadisticas"]
     lista_datos = []
-    cantidad = len(lista_jugadores)
-    indice = input("Ingrese el indice del jugador a buscar: ")
-    indice_int = int(indice)
-    if indice_int >= 0 and indice_int < cantidad:
-        jugador = lista_jugadores[indice_int]
-        estadisticas = jugador["estadisticas"]
-        for clave, value in estadisticas.items():
-            clave_valida = re.sub("_", " ", clave)
-            dato = "{0} : {1}".format(clave_valida, value)
-            print(dato)
-            lista_datos.append(dato)
-        nombre_archivo = "estadisticas.csv"
-        with open(nombre_archivo, "w") as file:
+    for clave, valor in estadisticas.items():
+        clave_valida = re.sub("_", " ", clave)
+        dato = "{0} : {1}".format(clave_valida, valor)
+        print(dato)
+        lista_datos.append(dato)
+
+    nombre_archivo = "estadisticas.csv"
+    with open(nombre_archivo, "w") as file:
             file.write(jugador["nombre"] + "\n")
             file.write(jugador["posicion"] + "\n")
             for dato in lista_datos:
                 file.write(str(dato) + "\n")
-    else:
-        print("El índice ingresado no es válido.")
+            else:
+                 print("El índice ingresado no es válido.")
 
-
+def ivan_sort_estadisticas(lista,clave,orden):
+    rango = len(lista_jugadores)
+    flag_swap = True
+    while flag_swap:
+        flag_swap = False
+        rango -= 1
+        for indice in range(rango):
+            if orden == "asc" and lista[indice]["estadisticas"][clave] > lista[indice +1]["estadisticas"][clave] or \
+            orden == "des" and lista[indice]["estadisticas"][clave] < lista[indice + 1]["estadisticas"][clave]:
+                lista[indice],lista[indice + 1] = lista[indice +1],lista[indice]
+                flag_swap = True
+    return lista         
 def calcular_promedio(lista_jugadores:list)->list:
     '''
     Calcula el promedio de puntos por partido
@@ -88,14 +115,18 @@ def mostrar_promedio(lista_jugadores: list)->list:
     '''
     if len(lista_jugadores) == 0:
         return lista_jugadores
-    promedios_puntos = []
-    for jugador in lista_jugadores:
+    promedio_total = calcular_promedio(lista_jugadores)
+    promedios_ordenados = ivan_sort_estadisticas(lista_jugadores, "promedio_puntos_por_partido", "asc")
+    print("El promedio total del Dream Team es : {0}".format(promedio_total))
+    for jugador in promedios_ordenados:
         nombre = jugador["nombre"]
-        promedios_punto = jugador["estadisticas"]["promedio_puntos_por_partido"]
-        nombre_y_promedio= ("{0}:{1}".format(nombre,promedios_punto))
-        promedios_puntos.append(nombre_y_promedio)
+        promedio = jugador["estadisticas"]["promedio_puntos_por_partido"]
+        nombre_promedio = "{0} : {1}".format(nombre, promedio)
+        print(nombre_promedio)
+        
+    
+    return promedios_ordenados  
 
-    return promedios_puntos
 
 
 
@@ -154,22 +185,21 @@ def mostrar_logros(lista_jugadores:list)->list:
         return "No se encontró ningún jugador con el nombre proporcionado."
 
 
-def verificar_salon_fama(lista_jugadores:list):
-    '''
-    Verifica si el nombre del jugador ingresado se encuentra en el salon de la fama
-    Recibe una lista
-    Retorna true en caso de encontrarlo o false si no lo encuentra
-    
-    '''
-    if len(lista_jugadores) == 0:
-        return lista_jugadores
-    nombre_jugador = input("Ingrese el nombre del jugador: ")
+def miembro_del_salon(lista_jugadores):
+    nombre = input("Ingrese el nombre del jugador: ")
+    patron = " "
+    if re.match(r"^[A-Za-z]{3}", nombre):
+        patron = nombre
+    else:
+        return "No se encontró ningún jugador."
+
     for jugador in lista_jugadores:
-        nombre = jugador["nombre"]
-        logros = jugador["logros"]
-        if nombre_jugador.lower() == nombre.lower() and "Miembro del Salon de la Fama del Baloncesto" in logros:
-            return True
-    return False
+        if patron.lower() in jugador["nombre"].lower():
+            logros = jugador["logros"]
+            if "Miembro del Salon de la Fama del Baloncesto" in logros:
+                return("Es miembro del salon de la fama")
+            else:
+                return("No es miembro del salon de la fama")
 
 
 def ivan_sort_A(lista_original:list)->list:
@@ -236,10 +266,9 @@ def mostrar_jugadores_mayor_al_promedio(lista_jugadores:list, clave:str):
         for jugador in jugadores_mayor_promedio:
             nombre = jugador["nombre"]
             promedio = jugador["estadisticas"][clave]
-            print("Jugador: {0}".format(nombre))
             clave_sin_guion = re.sub("_"," ",clave)
-            print("Promedio de {0} por partido: {1}".format(clave_sin_guion, promedio))
-    else:
+            print("{0} | {1} : {2}".format(nombre,clave_sin_guion, promedio))
+    else: 
         print("No se encontraron jugadores con promedio de {0} mayor que {1}.".format(clave, valor))
 
 def obtener_jugador_mayor_logros(lista_jugadores:list)->str:
@@ -363,7 +392,12 @@ def contar_por_posicion(lista_jugadores):
 
 
 def quick_sort_dicts(lista:list, clave: str, asc:bool = True)->list:
-  
+    '''
+    Realiza una clasificación rápida en una lista de diccionarios según una clave y un orden específico.
+    Ordena los datos que están dentro de un diccionario de la lista.
+    Recibe una lista, una clave y un booleano
+    Retorna una lista ordenada
+    '''
 
     lista_de = []
     lista_iz = []
@@ -490,7 +524,7 @@ def menu():
     "17 - Mostrar los jugadores que hayan tenido un porcentaje de tiros triples superior al valor ingresado\n"\
     "18 - Jugador con la mayor cantidad de temporadas jugadas\n"\
     "19 - Mostrar los jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior al valor ingresado\n"\
-    "23 - BONUS !!! Mostrar la posición de cada jugador en los siguientes rankings:Puntos, Rebotes, Asistencias y Robos\n"\
+    "23 - Mostrar la posición de cada jugador en los siguientes rankings:Puntos, Rebotes, Asistencias y Robos\n"\
     "0 - Salir\n"\
     
 
@@ -500,7 +534,7 @@ def menu():
 
 def opcion_elegida():
     opcion = input("Ingrese una opción: ")
-    while not re.match(r"^(0|[1-9]|2[0-9])$", opcion):
+    while not re.match(r"^(0|[1-9]|1[0-9]|2[0-7])$", opcion):
         print("Opción inválida. Intente nuevamente.")
         opcion = input("Ingrese una opción: ")
     return int(opcion)
@@ -520,14 +554,9 @@ while True:
             case 3:
                 print(mostrar_logros(lista_jugadores))
             case 4:
-                print("El promedio total de puntos por partidos del dream team es : {0}".format(calcular_promedio(lista_jugadores)))
-                for promedios in ivan_sort_A(mostrar_promedio(lista_jugadores)):
-                    print(promedios)
+                mostrar_promedio(lista_jugadores)
             case 5:
-                if verificar_salon_fama(lista_jugadores):
-                    print("El jugador es miembro del salon de la fama")
-                else:
-                    print("El jugador no es miembro del salon de la fama")    
+                print(miembro_del_salon(lista_jugadores))
             case 6:
                 calcular_y_mostrar_max_jugador(lista_jugadores, "rebotes_totales")
             case 7:
